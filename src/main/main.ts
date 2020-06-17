@@ -4,6 +4,7 @@ import path from "path";
 import contextMenu from "electron-context-menu";
 import electronDebug from "electron-debug";
 
+import { windowStateKeeper } from "../renderer/utils/windowStateKeeper";
 import { initLogger } from "../shared/logger";
 import { initI18n } from "./i18n/i18n";
 import initIpcListeners from "./ipcMain/listeners";
@@ -19,10 +20,13 @@ contextMenu({
 });
 
 async function createWindow(): Promise<BrowserWindow> {
+	const mainWindowStateKeeper = windowStateKeeper('main');
 	const win = new BrowserWindow({
-		width: 1100,
+		x: mainWindowStateKeeper.x,
+		y: mainWindowStateKeeper.y,
+		width: mainWindowStateKeeper.width,
 		minWidth: 500,
-		height: 600,
+		height: mainWindowStateKeeper.height,
 		minHeight: 500,
 		show: false,
 		titleBarStyle: "hiddenInset",
@@ -31,6 +35,7 @@ async function createWindow(): Promise<BrowserWindow> {
 			spellcheck: true,
 		},
 	});
+	mainWindowStateKeeper.track(win);
 	win.on("ready-to-show", (): void => {
 		win.show();
 	});
